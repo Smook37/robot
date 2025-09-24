@@ -136,20 +136,81 @@ class RoverClientUI(QMainWindow):
         self.statusBar().addPermanentWidget(self.btnQuit)
 
         # === Connexions minimales (sans logique réseau pour l’instant) ========
-        self.btnQuit.clicked.connect(self.close)
-        self.sldVitesse.valueChanged.connect(self._update_pct)
+        self.btnQuit.clicked.connect(self._on_quit_clicked)
 
-        # Petites traces pour vérifier que tout marche
-        for w in (self.btnConnect, self.btnDisconnect, self.btnSend, self.btnAv,
-                  self.btnStop, self.btnArr, self.btnLeft, self.btnRight,
-                  self.btnReqCapteurs):
-            w.clicked.connect(lambda _, b=w: self._trace(f"[UI] Clic: {b.text()}"))
+        self.btnConnect.clicked.connect(self._on_connect_clicked)
+        self.btnDisconnect.clicked.connect(self._on_disconnect_clicked)
+        self.btnSend.clicked.connect(self._on_send_clicked)
+        self.edtMsg.returnPressed.connect(self._on_send_clicked)
+
+        self.btnAv.clicked.connect(self._on_forward_clicked)
+        self.btnStop.clicked.connect(self._on_stop_clicked)
+        self.btnArr.clicked.connect(self._on_backward_clicked)
+        self.btnLeft.clicked.connect(self._on_left_clicked)
+        self.btnRight.clicked.connect(self._on_right_clicked)
+
+        self.btnReqCapteurs.clicked.connect(self._on_req_capteurs_clicked)
+
+        self.edtIp.editingFinished.connect(self._on_ip_edited)
+        self.edtPort.editingFinished.connect(self._on_port_edited)
+
+        self.sldVitesse.valueChanged.connect(self._on_speed_changed)
 
     # -------------------------- Helpers UI ------------------------------------
-    def _update_pct(self, val: int):
+    def _on_quit_clicked(self):
+        self._trace("[UI] Demande de fermeture de l'application")
+        self.close()
+
+    def _on_connect_clicked(self):
+        self._trace(
+            f"[UI] Connexion demandée vers {self.edtIp.text()}:{self.edtPort.text()}"
+        )
+        self.btnConnect.setEnabled(False)
+        self.btnDisconnect.setEnabled(True)
+
+    def _on_disconnect_clicked(self):
+        self._trace("[UI] Déconnexion demandée")
+        self.btnConnect.setEnabled(True)
+        self.btnDisconnect.setEnabled(False)
+
+    def _on_send_clicked(self):
+        message = self.edtMsg.text().strip()
+        if not message:
+            self._trace("[UI] Aucun message à envoyer")
+            return
+        self._trace(f"[UI] Envoi du message : {message}")
+        self.edtMsg.clear()
+
+    def _on_forward_clicked(self):
+        self._trace("[UI] Commande: avancer")
+
+    def _on_stop_clicked(self):
+        self._trace("[UI] Commande: stop")
+
+    def _on_backward_clicked(self):
+        self._trace("[UI] Commande: reculer")
+
+    def _on_left_clicked(self):
+        self._trace("[UI] Commande: tourner à gauche")
+
+    def _on_right_clicked(self):
+        self._trace("[UI] Commande: tourner à droite")
+
+    def _on_req_capteurs_clicked(self):
+        self._trace("[UI] Requête de mise à jour des capteurs")
+
+    def _on_ip_edited(self):
+        self._trace(f"[UI] Adresse IP saisie : {self.edtIp.text()}")
+
+    def _on_port_edited(self):
+        self._trace(f"[UI] Port saisi : {self.edtPort.text()}")
+
+    def _on_speed_changed(self, val: int):
         self.lblPct.setText(f"{val} %")
+        self._trace(f"[UI] Vitesse réglée à {val} %")
 
     def _trace(self, msg: str):
+        print(msg)
         self.txtLog.appendPlainText(msg)
 
 
